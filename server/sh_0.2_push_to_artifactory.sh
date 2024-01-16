@@ -2,9 +2,9 @@
 PROJECT_ID="skip-the-dishes-410816"
 REGION="us-central1"
 REPOSITORY="regionbusyness"
-IMAGE_TAG='training:latest'
+IMAGE_TAG='serving:latest'
 
-# Create repository in the artifact registry
+#Create repository in the artifact registry
 gcloud beta artifacts repositories create $REPOSITORY \
   --repository-format=docker \
   --location=$REGION
