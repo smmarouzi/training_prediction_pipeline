@@ -19,13 +19,15 @@ app = Flask(__name__)
 
 PREDICT_ROUTE = os.environ.get("AIP_PREDICT_ROUTE", "/predict")
 HEALTH_ROUTE = os.environ.get("AIP_HEALTH_ROUTE", "/health")
-AIP_STORAGE_URI = os.environ["AIP_STORAGE_URI"]  # Vertex AI sets this env with path to the model artifact
+# Vertex AI sets this env with path to the model artifact
+AIP_STORAGE_URI = os.environ["AIP_STORAGE_URI"]
 logger.info(f"MODEL PATH: {AIP_STORAGE_URI}")
 
 MODEL_PATH = "model/model.pickle"
 
 # Creation of the Flask app
 app = Flask(__name__)
+
 
 def decode_gcs_url(url: str) -> Tuple[str, str, str]:
     """
@@ -38,7 +40,8 @@ def decode_gcs_url(url: str) -> Tuple[str, str, str]:
     blob = url.split('/', 3)[-1]
     return bucket, blob
 
-def download_artifacts(artifacts_uri:str, local_path:str):
+
+def download_artifacts(artifacts_uri: str, local_path: str):
     logger.info(f"Downloading {artifacts_uri} to {local_path}")
     storage_client = storage.Client()
     src_bucket, src_blob = decode_gcs_url(artifacts_uri)
@@ -47,21 +50,26 @@ def download_artifacts(artifacts_uri:str, local_path:str):
     source_blob.download_to_filename(local_path)
     logger.info(f"Downloaded.")
 
-def load_artifacts(artifacts_uri:str=AIP_STORAGE_URI):
+
+def load_artifacts(artifacts_uri: str = AIP_STORAGE_URI):
     model_uri = os.path.join(artifacts_uri, "model")
     logger.info(f"Loading artifacts from {model_uri}")
     download_artifacts(model_uri, MODEL_PATH)
 
 # Flask route for Liveness checks
+
+
 @app.route(HEALTH_ROUTE, methods=['GET'])
 def health_check():
     return "I am alive, 200"
 
 # Flask route for predictions
+
+
 @app.route(PREDICT_ROUTE, methods=['POST'])
 def prediction():
     logger.info("SERVING ENDPOINT: Received predict request.")
-    
+
     load_artifacts()
     model = load_model(MODEL_PATH)
     logger.info(f"MODEL LOADED")
@@ -82,9 +90,9 @@ def prediction():
 
     response = {"predictions": model_output.tolist()}
     logger.info("SERVING ENDPOINT: Finished processing.")
-    
+
     return response
 
 
 if __name__ == "__main__":
-	app.run(debug=True, host='0.0.0.0', port=8080)	
+    app.run(debug=True, host='0.0.0.0', port=8080)

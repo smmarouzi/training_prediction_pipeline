@@ -1,0 +1,16 @@
+[flake8]
+ignore=
+    # (pydocstyle) requires docstring in __init__, often this is trivial
+    D107,
+
+    # (pydocstyle) Multi-line docstring summary should start at the first line
+    D212,
+
+    # line too long; black catches this
+    E501,
+
+    # line break before binary operator; black causes violations of this
+    W503,
+
+    # invalid escape sequence in string such as '\[' with rich; pylint catches this
+    W605,

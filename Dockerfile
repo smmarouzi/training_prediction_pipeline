@@ -1,4 +1,4 @@
-FROM mirror.gcr.io/library/python:3.11
+FROM mirror.gcr.io/library/python:3.10
 WORKDIR /
 COPY requirements.txt /requirements.txt
 COPY src /src

@@ -1,64 +1,65 @@
 from src.prepare_data.preprocessing import *
 from src.prepare_data.config import Radius
 from src.train.model import *
-import pandas as pd 
+import pandas as pd
+import pandas as pd
+from sklearn.model_selection import train_test_split
+import pickle
+from src.train.model import BusynessEstimation
+from src.train.config import Data
 
 if __name__ == "__main__":
-    """ 
+
+    print("------------------Data Ingestion--------------------------")
     data_path = 'assignment/final_dataset.csv'
     train_df = pd.read_csv(data_path)
+    print("------------------Data Preparation--------------------------")
     train_df_preprocessed = data_preprocessing_pipeline(train_df)
     prepared_data_path = "assignment/model_data.csv"
     train_df_preprocessed.to_csv(prepared_data_path, index=False)
-    """
-    """
-    import pandas as pd
-    from sklearn.model_selection import train_test_split
 
     prepared_data_path = "assignment/model_data.csv"
     df = pd.read_csv(prepared_data_path)
+
+    print("------------------Train Test Split--------------------------")
     df_train, df_test = train_test_split(df, test_size=0.33, random_state=42)
     train_path = "assignment/train.csv"
     test_path = "assignment/test.csv"
     df_train.to_csv(train_path, index=False)
     df_test.to_csv(test_path, index=False)
-    
-    import pandas as pd
-    import pickle
-    from src.train.model import BusynessEstimation
-    from src.train.config import Data
-    from src.utils.utils import get_image_data
 
+    print("------------------Train Model--------------------------")
     train_path = "assignment/train.csv"
     test_path = "assignment/test.csv"
-    
+
     # Read train and test data
     train_data = pd.read_csv(train_path)
     test_data = pd.read_csv(test_path)
-    
+
     # Instantiate the model class
     busyness_model = BusynessEstimation(
-                                        test_data.copy()
-                                        )
-                                        
+        test_data.copy()
+    )
+
     # Create X_train and y_train
     X_train = train_data.drop(Data.target, axis=1)
     y_train = train_data[Data.target]
 
     # Fit the model (training pipeline consists of feature engineering, feature selection and training an xgboost model)
     busyness_model.fit(X_train, y_train)
-    
+
     # Save the best hyperparameters as an artifact
     print(busyness_model.best_params)
-    
+    print("------------------Save model--------------------------")
     model_path = "assignment/rf.sav"
     # Save the model as an artifact
-    with open(model_path, 'wb') as f: 
+    with open(model_path, 'wb') as f:
         pickle.dump({
             "pipeline": busyness_model.model_pipeline,
             "target": busyness_model.target,
             "scores_dict": busyness_model.scores}, f)
-    """
+
+    print("------------------Prediction--------------------------")
     filename = "assignment/rf.sav"
     import pickle
     p = pickle.load(open(filename, 'rb'))
@@ -70,5 +71,3 @@ if __name__ == "__main__":
     Y_test = test_df[Data.target[0]]
     result = p["pipeline"].score(X_test, Y_test)
     print(result)
-    
-    
