@@ -1,4 +1,4 @@
-FROM mirror.gcr.io/library/python:3.11
+FROM mirror.gcr.io/library/python:3.10
 
 RUN mkdir -p /app/model
 WORKDIR /app
