@@ -1,7 +1,7 @@
 #!/bin/bash     
-PROJECT_ID="skip-the-dishes-410816"
+PROJECT_ID="id"
 REGION="us-central1"
-REPOSITORY="regionbusyness"
+REPOSITORY="rb"
 IMAGE='training'
 IMAGE_TAG='training:latest'
 
