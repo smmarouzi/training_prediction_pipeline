@@ -228,3 +228,4 @@ def data_preprocessing_pipeline(df: pd.DataFrame) -> pd.DataFrame:
         .pipe(feature_selection)
     )
     return df
+    
