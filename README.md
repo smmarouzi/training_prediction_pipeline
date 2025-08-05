@@ -1,5 +1,40 @@
 # Training Prediction Pipeline
 
+This project provides an end–to–end pipeline for preparing data, training a
+busyness estimation model, and evaluating its performance.
+
+## Setup
+
+1. Create and activate a virtual environment:
+
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+## Running the pipeline
+
+Execute the entry point script to preprocess data, train the model, and output
+evaluation results:
+
+```bash
+python main.py
+```
+
+## Running tests
+
+Run the unit tests with:
+
+```bash
+pytest
+```
+
 ## Secrets
 
 The CD workflow (`.github/workflows/cd.yml`) requires the following secrets:
