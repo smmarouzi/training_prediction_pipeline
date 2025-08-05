@@ -31,7 +31,7 @@ class Config:
         if getenv("DATA_PATH") is None:
             self.exit_program("DATA_PATH")
         else:
-            self.data_path = data_path  # pragma: no cover
+            self.data_path = getenv("DATA_PATH")  # pragma: no cover
 
         test_data_file = getenv("TEST_DATA_FILE")
         if test_data_file is None:
