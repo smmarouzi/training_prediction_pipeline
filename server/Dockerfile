@@ -10,4 +10,4 @@ COPY src /app/src
 
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-CMD exec gunicorn --bind :$AIP_HTTP_PORT --log-level info --workers 1 --timeout 90 app:app
+CMD exec gunicorn --bind :$AIP_HTTP_PORT --log-level info --workers ${GUNICORN_WORKERS:-1} --timeout 90 app:app
