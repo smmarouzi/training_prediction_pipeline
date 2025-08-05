@@ -22,6 +22,17 @@ function lint:ci {
     SKIP=no-commit-to-branch pre-commit run --all-files
 }
 
+# run the Ruff linter across source and test modules
+function lint:ruff {
+    ruff check "$THIS_DIR/src" "$THIS_DIR/server/src" "$THIS_DIR/test"
+}
+
+# static type checking with mypy
+function type-check {
+    mypy --ignore-missing-imports --no-strict-optional --explicit-package-bases \
+        "$THIS_DIR/src" "$THIS_DIR/server/src"
+}
+
 # execute tests that are not marked as `slow`
 function test:quick {
     run-tests -m "not slow" ${@:-"$THIS_DIR/tests/"}
