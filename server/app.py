@@ -3,7 +3,8 @@ import sys
 import json
 import re
 import logging
-from typing import Any, Dict, List, Tuple
+from threading import Lock
+from typing import Any, Dict, Tuple
 
 import pandas as pd
 from flask import Flask, request, abort
@@ -24,6 +25,10 @@ AIP_STORAGE_URI = os.environ["AIP_STORAGE_URI"]
 logger.info(f"MODEL PATH: {AIP_STORAGE_URI}")
 
 MODEL_PATH = "model/model.pickle"
+
+# Cache model in memory to avoid reloading on every request.
+_model: Dict[str, Any] | None = None
+_model_lock = Lock()
 
 
 def decode_gcs_url(url: str) -> Tuple[str, str]:
@@ -49,6 +54,23 @@ def load_artifacts(artifacts_uri: str = AIP_STORAGE_URI) -> None:
     logger.info("Loading artifacts from %s", model_uri)
     download_artifacts(model_uri, MODEL_PATH)
 
+
+def get_model() -> Dict[str, Any]:
+    """Lazy-load and cache the model artifact.
+
+    When running in production, the model is loaded once and reused for
+    subsequent requests, which significantly improves throughput under heavy
+    load.
+    """
+    global _model
+    if _model is None:
+        with _model_lock:
+            if _model is None:
+                load_artifacts()
+                _model = load_model(MODEL_PATH)
+                logger.info("MODEL LOADED")
+    return _model
+
 # Flask route for Liveness checks
 
 
@@ -62,10 +84,7 @@ def health_check() -> str:
 @app.route(PREDICT_ROUTE, methods=["POST"])
 def prediction() -> Dict[str, Any]:
     logger.info("SERVING ENDPOINT: Received predict request.")
-
-    load_artifacts()
-    model = load_model(MODEL_PATH)
-    logger.info("MODEL LOADED")
+    model = get_model()
     payload = json.loads(request.data)
 
     instances = payload["instances"]

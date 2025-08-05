@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import pickle
 from typing import Tuple
 
@@ -11,12 +12,28 @@ from sklearn.model_selection import train_test_split
 from src.prepare_data.preprocessing import data_preprocessing_pipeline
 from src.train.config import Data
 from src.train.model import BusynessEstimation
+from utils import read_bigquery
 
 
-def prepare_data(data_path: str, prepared_path: str) -> pd.DataFrame:
-    """Load raw data, preprocess it and persist the result."""
+def prepare_data(
+    data_path: str,
+    prepared_path: str,
+    *,
+    bq_project_id: str | None = None,
+    bq_query: str | None = None,
+) -> pd.DataFrame:
+    """Load raw data, preprocess it and persist the result.
 
-    train_df = pd.read_csv(data_path)
+    The data can come either from a local CSV file or directly from BigQuery
+    when ``bq_project_id`` and ``bq_query`` are provided.  The latter option
+    leverages the BigQuery Storage API for efficient retrieval of large
+    datasets.
+    """
+
+    if bq_project_id and bq_query:
+        train_df = read_bigquery(bq_query, bq_project_id)
+    else:
+        train_df = pd.read_csv(data_path)
     train_df_preprocessed = data_preprocessing_pipeline(train_df)
     train_df_preprocessed.to_csv(prepared_path, index=False)
     return train_df_preprocessed
@@ -105,7 +122,15 @@ def main() -> None:
     test_path = "assignment/test.csv"
     model_path = "assignment/rf.sav"
 
-    df_prepared = prepare_data(data_path, prepared_path)
+    bq_project_id = os.environ.get("BQ_PROJECT_ID")
+    bq_query = os.environ.get("BQ_TRAINING_QUERY")
+
+    df_prepared = prepare_data(
+        data_path,
+        prepared_path,
+        bq_project_id=bq_project_id,
+        bq_query=bq_query,
+    )
     split_data(
         df_prepared,
         train_path,
