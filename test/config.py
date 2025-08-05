@@ -1,11 +1,25 @@
+"""Configuration helper for tests."""
+
 from os import getenv
 from sys import exit
+
+try:  # pragma: no cover - optional dependency
+    from dotenv import load_dotenv
+except ModuleNotFoundError:  # pragma: no cover - gracefully handle missing package
+    def load_dotenv(*_args, **_kwargs):
+        """Fallback load_dotenv when python-dotenv is unavailable."""
+
+        return False
 
 from utils.logger import logger
 
 
 class Config:
-    def __init__(self):
+    """Load and validate required environment variables for tests."""
+
+    def __init__(self) -> None:
+        load_dotenv()
+
         if getenv("DATA_PATH") is None:
             self.exit_program("DATA_PATH")
         else:
@@ -36,7 +50,9 @@ class Config:
         else:
             self.metric_file = getenv("METRIC_FILE")
 
-    def exit_program(self, env_var):
+    def exit_program(self, env_var: str) -> None:
+        """Exit test execution when a variable is missing."""
+
         error_message = (
             f"test: {env_var} is missing from the set environment variables."
         )
