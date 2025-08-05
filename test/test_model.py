@@ -12,7 +12,7 @@ from sklearn.pipeline import Pipeline
 from .config import Config
 
 
-def test_model():
+def test_model() -> None:
     """Evaluate the stored model on the test set and assert basic properties.
 
     The function loads the model and test dataset using paths provided via

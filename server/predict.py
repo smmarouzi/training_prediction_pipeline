@@ -1,7 +1,8 @@
 # This module is intended to be used in the serving container
 import os
-from typing import Dict, List, Tuple
 import pickle
+from typing import Any, Dict, List, Tuple
+
 import pandas as pd
 
 from src.prepare_data.preprocessing import data_preprocessing_pipeline
@@ -17,8 +18,8 @@ handler.setFormatter(formatter)
 logger.handlers = [handler]
 
 
-def load_model(path: str):
-    """Loads a model artifact.
+def load_model(path: str) -> Dict[str, Any]:
+    """Load a model artifact from ``path``.
 
     Raises a ``FileNotFoundError`` if the model file is missing and logs other
     issues encountered while deserializing the object.
@@ -37,17 +38,8 @@ def load_model(path: str):
     return model
 
 
-def model_predict(model: Dict, data: pd.DataFrame) -> Tuple[List, str]:
-    """
-    Use the input model to get predictions on the input data.
-
-    model: A dictionary of objects used to make prediction.
-           In its simplest case the dictionary has one item e.g. a scikit.learn Estimator
-    data: A generic pandas DataFrame
-
-    Returns: A list where each element is the predictions of the model for a single instance
-             of input data
-    """
+def model_predict(model: Dict[str, Any], data: pd.DataFrame) -> Tuple[List[Any], str]:
+    """Use ``model`` to obtain predictions for ``data``."""
 
     try:
         pipeline = model["pipeline"]

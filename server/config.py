@@ -2,6 +2,7 @@
 
 from os import getenv
 from sys import exit
+from typing import NoReturn
 
 try:  # pragma: no cover - optional dependency
     from dotenv import load_dotenv
@@ -26,7 +27,7 @@ class Config:
         if getenv("ML_BASE_URI") is None:
             self.exit_program("ML_BASE_URI")
         else:
-            self.ml_base_uri = getenv("ML_BASE_URI")
+            self.ml_base_uri = ml_base_uri  # pragma: no cover
 
     def exit_program(self, env_var: str) -> None:
         """Exit the program with a helpful error message."""
