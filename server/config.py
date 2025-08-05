@@ -1,25 +1,38 @@
+"""Configuration utilities for the prediction server."""
+
 from os import getenv
 from sys import exit
 
+try:  # pragma: no cover - optional dependency
+    from dotenv import load_dotenv
+except ModuleNotFoundError:  # pragma: no cover - gracefully handle missing package
+    def load_dotenv(*_args, **_kwargs):
+        """Fallback load_dotenv when python-dotenv is unavailable."""
+
+        return False
+
 
 class Config:
-    """
-    Checks for all necessary configurations and exits the app
-    if they are not set correctly.
+    """Validate and load required environment variables.
 
-    Methods:
-        exit_program(env_var): if an environment variable is
-                missing, it exists with an error message
+    The class ensures all necessary environment variables are present and
+    accessible. It will exit the application with an informative error message
+    if any required variable is missing.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        load_dotenv()
+
         if getenv("ML_BASE_URI") is None:
             self.exit_program("ML_BASE_URI")
         else:
             self.ml_base_uri = getenv("ML_BASE_URI")
 
-    def exit_program(self, env_var):
+    def exit_program(self, env_var: str) -> None:
+        """Exit the program with a helpful error message."""
+
         error_message = (
             f"SERVER: {env_var} is missing from the set of environment variables."
         )
-        exit(f"{error_message}")
+        exit(error_message)
+
