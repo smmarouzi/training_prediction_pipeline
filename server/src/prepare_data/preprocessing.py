@@ -21,7 +21,13 @@ handler.setFormatter(formatter)
 logger.handlers = [handler]
 
 def prepare_restaurants_ids(df:pd.DataFrame) -> dict:
-    """Add resturant id column"""
+    """Build mapping of restaurant coordinates to unique IDs.
+
+    The DataFrame is scanned for unique combinations of ``restaurant_lat`` and
+    ``restaurant_lon``.  Each distinct coordinate pair receives an integer
+    identifier and is stored in a dictionary keyed by ``"<lat>_<lon>"``.  The
+    mapping with coordinates and their assigned ID is then returned.
+    """
     logger.info('PREPARING RESURANT IDs...')
     
     #unique restaurants
