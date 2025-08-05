@@ -15,10 +15,16 @@ install:
 	bash run.sh install
 
 lint:
-	bash run.sh lint
+        bash run.sh lint
 
 lint-ci:
-	bash run.sh lint:ci
+        bash run.sh lint:ci
+
+lint-ruff:
+        bash run.sh lint:ruff
+
+type-check:
+        bash run.sh type-check
 
 publish-prod:
 	bash run.sh publish:prod
