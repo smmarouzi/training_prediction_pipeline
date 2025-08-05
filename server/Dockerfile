@@ -3,9 +3,9 @@ FROM mirror.gcr.io/library/python:3.10
 RUN mkdir -p /app/model
 WORKDIR /app
 
-COPY requirements.txt /app/requirements.txt
-COPY app.py /app/app.py
-COPY predict.py /app/predict.py
+COPY server/requirements.txt /app/requirements.txt
+COPY server/*.py /app/
+COPY server/entities /app/entities
 COPY src /app/src
 
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt

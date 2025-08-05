@@ -8,6 +8,6 @@ REPOSITORY="regionbusyness"
 IMAGE='serving'
 IMAGE_TAG='serving:latest'
 
-docker build -t "$IMAGE" .
+docker build -f Dockerfile -t "$IMAGE" ..
 docker tag "$IMAGE" "$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_TAG"
 
