@@ -1,18 +1,40 @@
+"""Utilities for running grid search during model training."""
+
 from sklearn.model_selection import GridSearchCV
-from src.train.config import GridSearch
+
+# Alias the configuration class to avoid naming conflicts with this module's
+# ``GridSearch`` class. Without the alias, the class below would shadow the
+# imported configuration and attempting to access attributes such as
+# ``params`` or ``cv`` would raise an ``AttributeError``.
+from src.train.config import GridSearch as GridSearchConfig
+
 
 class GridSearch:
+    """Wrapper around :class:`sklearn.model_selection.GridSearchCV`.
+
+    Parameters for the grid search are taken from
+    :class:`src.train.config.GridSearch`.
+    """
+
     def __init__(self, regr) -> None:
-        self.grid_search = GridSearchCV(estimator=regr,
-                                param_grid=GridSearch.params,
-                                cv = GridSearch.cv,
-                                n_jobs=GridSearch.n_jobs, verbose=1, scoring=GridSearch.scoring)
+        self.grid_search = GridSearchCV(
+            estimator=regr,
+            param_grid=GridSearchConfig.params,
+            cv=GridSearchConfig.cv,
+            n_jobs=GridSearchConfig.n_jobs,
+            verbose=GridSearchConfig.verbose,
+            scoring=GridSearchConfig.scoring,
+        )
+
     def fit(self, X_train, y_train):
+        """Fit the grid search on training data."""
         self.grid_search.fit(X_train, y_train)
         self.rf_best = self.grid_search.best_estimator_
-        
+
     def best_score(self):
+        """Return the best score obtained during grid search."""
         return self.grid_search.best_score_
-    
+
     def evaluate(self, X_test, y_test):
-        self.rf_best.score(X_test, y_test)
+        """Evaluate the best model on the test data."""
+        return self.rf_best.score(X_test, y_test)
