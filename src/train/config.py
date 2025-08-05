@@ -1,7 +1,6 @@
 class Data:
-    train_size = 0.77
-    test_size = 0.33
-    split_random_state=42
+    test_size = 0.3
+    split_random_state = 42
     features = ['dist_to_restaurant', 'Hdist_to_restaurant', 'avg_Hdist_to_restaurants',\
         'date_day_number', 'restaurant_id', 'Five_Clusters_embedding', 'h3_index',\
             'date_hour_number', 'restaurants_per_index']
