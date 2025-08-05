@@ -23,11 +23,31 @@ def prepare_data(data_path: str, prepared_path: str) -> pd.DataFrame:
 
 
 def split_data(
-    df: pd.DataFrame, train_path: str, test_path: str
+    df: pd.DataFrame,
+    train_path: str,
+    test_path: str,
+    test_size: float = Data.test_size,
+    random_state: int = Data.split_random_state,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Split ``df`` into train and test datasets and save them."""
+    """Split ``df`` into train and test datasets and save them.
 
-    df_train, df_test = train_test_split(df, test_size=0.33, random_state=42)
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataset to split.
+    train_path : str
+        Destination file path for the train split.
+    test_path : str
+        Destination file path for the test split.
+    test_size : float, optional
+        Proportion of the dataset to include in the test split.
+    random_state : int, optional
+        Seed used by the random number generator.
+    """
+
+    df_train, df_test = train_test_split(
+        df, test_size=test_size, random_state=random_state
+    )
     df_train.to_csv(train_path, index=False)
     df_test.to_csv(test_path, index=False)
     return df_train, df_test
@@ -86,7 +106,13 @@ def main() -> None:
     model_path = "assignment/rf.sav"
 
     df_prepared = prepare_data(data_path, prepared_path)
-    split_data(df_prepared, train_path, test_path)
+    split_data(
+        df_prepared,
+        train_path,
+        test_path,
+        test_size=Data.test_size,
+        random_state=Data.split_random_state,
+    )
 
     model = train_model(train_path, test_path)
     print(model.best_params)
