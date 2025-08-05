@@ -27,7 +27,7 @@ class Config:
         if getenv("ML_BASE_URI") is None:
             self.exit_program("ML_BASE_URI")
         else:
-            self.ml_base_uri = ml_base_uri  # pragma: no cover
+            self.ml_base_uri = getenv("ML_BASE_URI")  # pragma: no cover
 
     def exit_program(self, env_var: str) -> None:
         """Exit the program with a helpful error message."""
