@@ -23,7 +23,7 @@ class BusynessEstimation(object):
     def __init__(self,
                  # train_df:pd.DataFrame=None,
                  test_df: pd.DataFrame = None,
-                 target: str = Data.target,
+                 target: str = Data.target[0],
                  random_state: int = RF.regr_random_state
                  ):
 
@@ -78,7 +78,7 @@ class BusynessEstimation(object):
     def fit(self, X, y=None):
 
         self.X_train = X.copy()
-        self.y_train = y.copy()
+        self.y_train = y.squeeze().copy()
 
         self.fit_and_evaluate_model()
 
