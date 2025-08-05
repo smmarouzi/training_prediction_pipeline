@@ -21,7 +21,7 @@ h3==3.7.7
 idna==3.7
 joblib==1.4.2
 kfp==2.7.0
-kubernetes==29.0.0
+kubernetes==26.1.0
 mypy-extensions==1.0.0
 numpy==1.26.4
 oauthlib==3.2.2
