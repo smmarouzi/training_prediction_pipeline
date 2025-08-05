@@ -52,12 +52,14 @@ class BusynessEstimation(object):
         logger.info("\nTRAINING THE MODEL...")
 
         self.model_pipeline.fit(self.X_train, self.y_train)
-        """
-        logger.info(f"\nGETTING THE SHAP VALUES")
-        self.X_test_transformed = Pipeline(self.model_pipeline.steps[:-1]).transform(self.test_df.drop(self.target, axis=1))
-        self.explainer = shap.TreeExplainer(self.model_pipeline.named_steps["rf"])
-        self.shap_values = self.explainer.shap_values(self.X_test_transformed)
-        """
+        # logger.info(f"\nGETTING THE SHAP VALUES")
+        # self.X_test_transformed = Pipeline(
+        #     self.model_pipeline.steps[:-1]
+        # ).transform(self.test_df.drop(self.target, axis=1))
+        # self.explainer = shap.TreeExplainer(self.model_pipeline.named_steps["rf"])
+        # self.shap_values = self.explainer.shap_values(
+        #     self.X_test_transformed
+        # )
         baseline_scores = {
             "r2": r2_score(self.y_train, [self.y_train.mean()] * len(self.y_train))
         }
