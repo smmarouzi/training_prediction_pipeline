@@ -25,9 +25,6 @@ logger.info(f"MODEL PATH: {AIP_STORAGE_URI}")
 
 MODEL_PATH = "model/model.pickle"
 
-# Creation of the Flask app
-app = Flask(__name__)
-
 
 def decode_gcs_url(url: str) -> Tuple[str, str]:
     """Split a Google Cloud Storage path into bucket and blob."""
