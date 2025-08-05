@@ -1,73 +1,104 @@
-from src.prepare_data.preprocessing import *
-from src.prepare_data.config import Radius
-from src.train.model import *
-import pandas as pd
+"""Entry point for data preparation, model training and evaluation."""
+
+from __future__ import annotations
+
+import pickle
+from typing import Tuple
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
-import pickle
-from src.train.model import BusynessEstimation
+
+from src.prepare_data.preprocessing import data_preprocessing_pipeline
 from src.train.config import Data
+from src.train.model import BusynessEstimation
 
-if __name__ == "__main__":
 
-    print("------------------Data Ingestion--------------------------")
-    data_path = 'assignment/final_dataset.csv'
+def prepare_data(data_path: str, prepared_path: str) -> pd.DataFrame:
+    """Load raw data, preprocess it and persist the result."""
+
     train_df = pd.read_csv(data_path)
-    print("------------------Data Preparation--------------------------")
     train_df_preprocessed = data_preprocessing_pipeline(train_df)
-    prepared_data_path = "assignment/model_data.csv"
-    train_df_preprocessed.to_csv(prepared_data_path, index=False)
+    train_df_preprocessed.to_csv(prepared_path, index=False)
+    return train_df_preprocessed
 
-    prepared_data_path = "assignment/model_data.csv"
-    df = pd.read_csv(prepared_data_path)
 
-    print("------------------Train Test Split--------------------------")
+def split_data(
+    df: pd.DataFrame, train_path: str, test_path: str
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Split ``df`` into train and test datasets and save them."""
+
     df_train, df_test = train_test_split(df, test_size=0.33, random_state=42)
-    train_path = "assignment/train.csv"
-    test_path = "assignment/test.csv"
     df_train.to_csv(train_path, index=False)
     df_test.to_csv(test_path, index=False)
+    return df_train, df_test
 
-    print("------------------Train Model--------------------------")
-    train_path = "assignment/train.csv"
-    test_path = "assignment/test.csv"
 
-    # Read train and test data
+def train_model(train_path: str, test_path: str) -> BusynessEstimation:
+    """Train the busyness estimation model."""
+
     train_data = pd.read_csv(train_path)
     test_data = pd.read_csv(test_path)
 
-    # Instantiate the model class
-    busyness_model = BusynessEstimation(
-        test_data.copy()
-    )
-
-    # Create X_train and y_train
+    busyness_model = BusynessEstimation(test_data.copy())
     X_train = train_data.drop(Data.target, axis=1)
     y_train = train_data[Data.target]
-
-    # Fit the model (training pipeline consists of feature engineering, feature selection and training an xgboost model)
     busyness_model.fit(X_train, y_train)
+    return busyness_model
 
-    # Save the best hyperparameters as an artifact
-    print(busyness_model.best_params)
-    print("------------------Save model--------------------------")
-    model_path = "assignment/rf.sav"
-    # Save the model as an artifact
-    with open(model_path, 'wb') as f:
-        pickle.dump({
-            "pipeline": busyness_model.model_pipeline,
-            "target": busyness_model.target,
-            "scores_dict": busyness_model.scores}, f)
 
-    print("------------------Prediction--------------------------")
-    filename = "assignment/rf.sav"
-    import pickle
-    p = pickle.load(open(filename, 'rb'))
-    print(p["target"])
-    print(p["scores_dict"])
-    print(p["pipeline"])
-    test_df = pd.read_csv("assignment/test.csv")
+def save_model(model: BusynessEstimation, model_path: str) -> None:
+    """Persist model artifact to ``model_path``."""
+
+    with open(model_path, "wb") as f:
+        pickle.dump(
+            {
+                "pipeline": model.model_pipeline,
+                "target": model.target,
+                "scores_dict": model.scores,
+            },
+            f,
+        )
+
+
+def load_model(model_path: str) -> dict:
+    """Load model artifact from ``model_path``."""
+
+    with open(model_path, "rb") as f:
+        return pickle.load(f)
+
+
+def evaluate(model_artifact: dict, test_path: str) -> float:
+    """Evaluate loaded model on the test dataset."""
+
+    test_df = pd.read_csv(test_path)
     X_test = test_df.drop(Data.target, axis=1)
-    Y_test = test_df[Data.target[0]]
-    result = p["pipeline"].score(X_test, Y_test)
+    y_test = test_df[Data.target[0]]
+    return model_artifact["pipeline"].score(X_test, y_test)
+
+
+def main() -> None:
+    """Orchestrate data preparation, training, and evaluation."""
+
+    data_path = "assignment/final_dataset.csv"
+    prepared_path = "assignment/model_data.csv"
+    train_path = "assignment/train.csv"
+    test_path = "assignment/test.csv"
+    model_path = "assignment/rf.sav"
+
+    df_prepared = prepare_data(data_path, prepared_path)
+    split_data(df_prepared, train_path, test_path)
+
+    model = train_model(train_path, test_path)
+    print(model.best_params)
+    save_model(model, model_path)
+
+    artifact = load_model(model_path)
+    result = evaluate(artifact, test_path)
+    print(artifact["target"])
+    print(artifact["scores_dict"])
+    print(artifact["pipeline"])
     print(result)
+
+
+if __name__ == "__main__":
+    main()
