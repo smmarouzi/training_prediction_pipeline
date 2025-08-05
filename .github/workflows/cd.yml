@@ -1,0 +1,61 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build Docker image
+        working-directory: server
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          REGION: ${{ secrets.GCP_REGION }}
+          REPOSITORY: regionbusyness
+          IMAGE: serving
+          IMAGE_TAG: serving:latest
+        run: |
+          docker build -t "$IMAGE" .
+          docker tag "$IMAGE" "$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_TAG"
+
+      - name: Push to Artifact Registry
+        working-directory: server
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          REGION: ${{ secrets.GCP_REGION }}
+          REPOSITORY: regionbusyness
+          IMAGE_TAG: serving:latest
+        run: |
+          gcloud beta artifacts repositories create "$REPOSITORY" \
+            --repository-format=docker \
+            --location="$REGION" || true
+          gcloud auth configure-docker "$REGION-docker.pkg.dev"
+          docker push "$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_TAG"
+
+      - name: Deploy to Cloud Run
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          REGION: ${{ secrets.GCP_REGION }}
+          REPOSITORY: regionbusyness
+          IMAGE_TAG: serving:latest
+          SERVICE: ${{ secrets.GCP_SERVICE_NAME }}
+        run: |
+          gcloud run deploy "$SERVICE" \
+            --image="$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_TAG" \
+            --project="$PROJECT_ID" \
+            --region="$REGION" \
+            --platform=managed \
+            --quiet
