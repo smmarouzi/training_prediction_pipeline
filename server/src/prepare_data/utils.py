@@ -9,15 +9,21 @@ def copy_df(df:pd.DataFrame):
 
     return df.copy()
 
-def calculate_eucleadian_dist(p1x:float, p1y:float, p2x:float, p2y:float):
-    p1 = (p2x - p1x)**2
-    p2 = (p2y - p1y)**2
+def calculate_euclidean_dist(p1x: float, p1y: float, p2x: float, p2y: float):
+    p1 = (p2x - p1x) ** 2
+    p2 = (p2y - p1y) ** 2
     dist = np.sqrt(p1 + p2)
     return dist.tolist() if isinstance(p1x, collections.abc.Sequence) else dist
 
-def calculate_avg_distance_to_resturants(courier_lat:float, courier_lon:float, restaurants_ids:dict):
-    return np.mean([calculate_eucleadian_dist(v['lat'], v['lon'], \
-        courier_lat, courier_lon) for v in restaurants_ids.values()])
+def calculate_avg_distance_to_restaurants(
+    courier_lat: float, courier_lon: float, restaurants_ids: dict
+):
+    return np.mean(
+        [
+            calculate_euclidean_dist(v["lat"], v["lon"], courier_lat, courier_lon)
+            for v in restaurants_ids.values()
+        ]
+    )
 
 def calculate_haversine_dist(lat1:float, lon1:float, lat2:float, lon2:float, radians_metric = "kilometers"):
    

@@ -5,9 +5,9 @@ import h3
 
 from src.prepare_data.utils import copy_df
 from src.prepare_data.config import Centroids, Random, H3, FinalFeatures
-from src.prepare_data.utils import calculate_eucleadian_dist
+from src.prepare_data.utils import calculate_euclidean_dist
 from src.prepare_data.utils import calculate_haversine_dist
-from src.prepare_data.utils import calculate_avg_distance_to_resturants
+from src.prepare_data.utils import calculate_avg_distance_to_restaurants
 from src.prepare_data.utils import calculate_avg_Hdist_to_restaurants
 
 import logging
@@ -66,7 +66,7 @@ def assign_centroids(df):
     centroids_list = [c for i,c in centroids.iterrows()]
     for i,obs in df.iterrows():
         # Estimate error
-        all_errors = [calculate_eucleadian_dist(centroid['lat'],
+        all_errors = [calculate_euclidean_dist(centroid['lat'],
                                 centroid['lon'],
                                 obs['courier_lat'],
                                 obs['courier_lon']) for centroid in centroids_list]
@@ -87,9 +87,12 @@ def add_distance_columns(df:pd.DataFrame):
     
     restaurants_ids = prepare_restaurants_ids(df)
     logger.info('ADDING 4 DISTANCE COLUMNS...')
-    df['dist_to_restaurant'] = calculate_eucleadian_dist(df.courier_lat, df.courier_lon, df.restaurant_lat, df.restaurant_lon)
+    df['dist_to_restaurant'] = calculate_euclidean_dist(df.courier_lat, df.courier_lon, df.restaurant_lat, df.restaurant_lon)
     logger.info('EUCLEADIAN DISTANCE ADDED...')
-    df['avg_dist_to_restaurants'] = [calculate_avg_distance_to_resturants(lat, lon, restaurants_ids) for lat,lon in zip(df.courier_lat, df.courier_lon)]
+    df['avg_dist_to_restaurants'] = [
+        calculate_avg_distance_to_restaurants(lat, lon, restaurants_ids)
+        for lat, lon in zip(df.courier_lat, df.courier_lon)
+    ]
     logger.info('AVG DISTANCE ADDED...')
     df['Hdist_to_restaurant'] = calculate_haversine_dist(df.courier_lat.tolist(), df.courier_lon.tolist(), df.restaurant_lat.tolist(), df.restaurant_lon.tolist())
     logger.info('HDIST ADDED...')
