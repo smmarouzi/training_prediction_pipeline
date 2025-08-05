@@ -1,7 +1,8 @@
 # This module is intended to be used in the serving container
 import os
-from typing import Dict, List, Tuple
 import pickle
+from typing import Any, Dict, List, Tuple
+
 import pandas as pd
 
 from src.prepare_data.preprocessing import data_preprocessing_pipeline
@@ -17,34 +18,29 @@ handler.setFormatter(formatter)
 logger.handlers = [handler]
 
 
-def load_model(path:str):
-    """Loads a model artifact"""
-    
+def load_model(path: str) -> Dict[str, Any]:
+    """Load a model artifact from ``path``."""
+
     with open(path, "rb") as f:
-        model = pickle.load(f)
-    
+        model: Dict[str, Any] = pickle.load(f)
+
     return model
 
 
-def model_predict(model: Dict, data: pd.DataFrame) -> Tuple[List, str]:
-    """
-    Use the input model to get predictions on the input data.
-
-    model: A dictionary of objects used to make prediction.
-           In its simplest case the dictionary has one item e.g. a scikit.learn Estimator
-    data: A generic pandas DataFrame
-
-    Returns: A list where each element is the predictions of the model for a single instance
-             of input data
-    """
+def model_predict(model: Dict[str, Any], data: pd.DataFrame) -> Tuple[List[Any], str]:
+    """Use ``model`` to obtain predictions for ``data``."""
 
     pipeline = model["pipeline"]
     target = model["target"]
 
-    logger.info(f"PREPROCESSING THE DATA...")
+    logger.info("PREPROCESSING THE DATA...")
     data_preprocessed = data_preprocessing_pipeline(data)
 
-    logger.info(f"STARTING PREDICT ON DATAFRAME WITH SHAPE: {data_preprocessed.shape} and dtypes: {data_preprocessed.dtypes}")
+    logger.info(
+        "STARTING PREDICT ON DATAFRAME WITH SHAPE: %s and dtypes: %s",
+        data_preprocessed.shape,
+        data_preprocessed.dtypes,
+    )
     model_output = pipeline.predict(data_preprocessed)
-    
-    return model_output, target
+
+    return model_output.tolist(), target

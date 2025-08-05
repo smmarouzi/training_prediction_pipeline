@@ -1,24 +1,21 @@
 from os import getenv
 from sys import exit
+from typing import NoReturn
 
 
 class Config:
-    """
-    Checks for all necessary configurations and exits the app
-    if they are not set correctly.
+    """Validate required environment variables for the serving application."""
 
-    Methods:
-        exit_program(env_var): if an environment variable is
-                missing, it exists with an error message
-    """
+    ml_base_uri: str
 
-    def __init__(self):
-        if getenv("ML_BASE_URI") is None:
+    def __init__(self) -> None:
+        ml_base_uri = getenv("ML_BASE_URI")
+        if ml_base_uri is None:
             self.exit_program("ML_BASE_URI")
         else:
-            self.ml_base_uri = getenv("ML_BASE_URI")
+            self.ml_base_uri = ml_base_uri  # pragma: no cover
 
-    def exit_program(self, env_var):
+    def exit_program(self, env_var: str) -> NoReturn:
         error_message = (
             f"SERVER: {env_var} is missing from the set of environment variables."
         )
